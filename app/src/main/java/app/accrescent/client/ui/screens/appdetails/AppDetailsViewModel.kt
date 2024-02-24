@@ -1,4 +1,4 @@
-package app.accrescent.client.ui
+package app.accrescent.client.ui.screens.appdetails
 
 import android.app.Application
 import android.content.Context
@@ -14,7 +14,9 @@ import androidx.lifecycle.viewModelScope
 import app.accrescent.client.Accrescent
 import app.accrescent.client.R
 import app.accrescent.client.data.AppInstallStatuses
+import app.accrescent.client.data.CommonsLinkType
 import app.accrescent.client.data.InstallStatus
+import app.accrescent.client.data.LinkTextData
 import app.accrescent.client.data.PreferencesManager
 import app.accrescent.client.data.RepoDataRepository
 import app.accrescent.client.util.PackageManager
@@ -46,6 +48,44 @@ class AppDetailsViewModel @Inject constructor(
     val requireUserAction = preferencesManager.requireUserAction
     var uiState by mutableStateOf(AppDetailsUiState(appId = appId))
         private set
+
+    //TODO(implements real links)
+    val appLinks = listOf(
+        LinkTextData(
+            "Source code",
+            "tag_my_source_code",
+            "https://github.com/Ruan625Br/FileManagerSphere",
+            CommonsLinkType.SOURCE_CODE),
+        LinkTextData(
+            "License",
+            "tag_app_license",
+            "https://github.com/Ruan625Br/FileManagerSphere/blob/master/LICENSE",
+            CommonsLinkType.LICENSE),
+        LinkTextData(
+            "Donate",
+            "tag_app_donate",
+            "https://github.com/sponsors/Ruan625Br",
+            CommonsLinkType.DONATE),
+        LinkTextData(
+            "Translation",
+            "tag_app_translation",
+            "https://hosted.weblate.org/engage/filemanagersphere/",
+            CommonsLinkType.TRANSLATION),
+        LinkTextData(
+            "Build metadata",
+            "tag_app_build_metadata",
+            "https://gitlab.com/fdroid/fdroiddata/-/blob/master/metadata/com.etb.filemanager.yml",
+            CommonsLinkType.BUILD_METADATA),
+        LinkTextData(
+            "Issue tracker",
+            "tag_issue_tracker",
+            "https://github.com/Ruan625Br/FileManagerSphere/issues",
+            CommonsLinkType.ISSUE_TRACKER),
+        LinkTextData(
+            "Generic link example",
+            "tag_app_generic_link",
+            "https://github.com/Ruan625Br/FileManagerSphere/pulls"),
+    )
 
     init {
         viewModelScope.launch {

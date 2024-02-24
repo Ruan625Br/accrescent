@@ -1,4 +1,4 @@
-package app.accrescent.client.ui
+package app.accrescent.client.ui.screens.applist
 
 import android.app.Application
 import android.content.Context

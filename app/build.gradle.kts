@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -174,6 +175,9 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.serialization)
     implementation(libs.work.runtime)
+    implementation(libs.google.fonts)
+    implementation(libs.constraintlayout.compose)
+    implementation(libs.zoomable)
     ksp(libs.dagger.compiler)
     ksp(libs.hilt.compiler)
     ksp(libs.room.compiler)

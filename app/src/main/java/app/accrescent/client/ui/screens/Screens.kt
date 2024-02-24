@@ -1,4 +1,4 @@
-package app.accrescent.client.ui
+package app.accrescent.client.ui.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
@@ -7,6 +7,7 @@ import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,4 +34,8 @@ sealed class Screen(
     object AppDetails : Screen("app_details", 0, null, null)
 
     object Settings : Screen("settings", R.string.settings, null, Icons.Rounded.Settings)
+
+    data object Search : Screen("search", R.string.search, null, Icons.Rounded.Search)
+
+    data object MediaView : Screen("media_view", R.string.media_view, null, null)
 }
