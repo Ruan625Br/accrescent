@@ -57,6 +57,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dynamicColor by viewModel.dynamicColor.collectAsState(false)
+    val isCardTransparent by viewModel.isCardTransparent.collectAsState(false)
     val requireUserAction by viewModel.requireUserAction.collectAsState(!context.isPrivileged())
     val automaticUpdates by viewModel.automaticUpdates.collectAsState(true)
     val networkType by viewModel.updaterNetworkType.collectAsState(NetworkType.CONNECTED.name)
@@ -85,8 +86,8 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
                 )
             }
         }
+        SettingGroupLabel(stringResource(R.string.customization), Modifier.padding(top = 16.dp))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            SettingGroupLabel(stringResource(R.string.customization), Modifier.padding(top = 16.dp))
             Setting(
                 label = stringResource(R.string.dynamic_color),
                 description = stringResource(R.string.dynamic_color_desc),
@@ -103,6 +104,22 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: SettingsViewModel =
                     onCheckedChange = null,
                 )
             }
+        }
+        Setting(
+            label = stringResource(R.string.card_backgrounds_transparent),
+            description = stringResource(R.string.card_backgrounds_transparent_desc),
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = isCardTransparent,
+                    role = Role.Switch,
+                    onValueChange = { coroutineScope.launch { viewModel.setCardTransparent(it) } }
+                )
+        ) {
+            Switch(
+                checked = isCardTransparent,
+                onCheckedChange = null,
+            )
         }
         val networkTypeNames = persistentListOf(
             stringResource(R.string.any),

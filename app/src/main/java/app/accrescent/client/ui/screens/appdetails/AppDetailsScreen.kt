@@ -2,18 +2,17 @@ package app.accrescent.client.ui.screens.appdetails
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -41,9 +40,11 @@ import app.accrescent.client.data.DownloadProgress
 import app.accrescent.client.data.InstallStatus
 import app.accrescent.client.data.LinkTextData
 import app.accrescent.client.data.MediaListInfo
+import app.accrescent.client.data.db.App
 import app.accrescent.client.ui.components.ActionConfirmDialog
 import app.accrescent.client.ui.components.AppIcon
 import app.accrescent.client.ui.components.AppImages
+import app.accrescent.client.ui.components.AppVariants
 import app.accrescent.client.ui.components.InstallActionsButtons
 import app.accrescent.client.ui.components.LinkText
 import app.accrescent.client.ui.theme.InterFontFamily
@@ -55,6 +56,7 @@ import kotlinx.collections.immutable.toImmutableList
 fun AppDetailsScreen(
     snackbarHostState: SnackbarHostState,
     onNavigateToMediaView: (MediaListInfo) -> Unit,
+    onNavigateToAppDetails: (App) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AppDetailsViewModel = hiltViewModel()
 ) {
@@ -67,6 +69,7 @@ fun AppDetailsScreen(
     var uninstallConfirmDialog by remember { mutableStateOf(false) }
 
     val appLinks = viewModel.appLinks.toImmutableList()
+    val appVariants = viewModel.appsVariants.toImmutableList()
 
     when {
         viewModel.uiState.isFetchingData -> {
@@ -83,12 +86,9 @@ fun AppDetailsScreen(
             shortDescription = viewModel.uiState.shortDescription,
             installStatus = installStatus ?: InstallStatus.LOADING,
             appLinks = appLinks,
+            appVariants = appVariants,
             onInstallClicked = {
-                if (
-                    context.isPrivileged() &&
-                    installStatus == InstallStatus.INSTALLABLE &&
-                    requireUserAction
-                ) {
+                if (context.isPrivileged() && installStatus == InstallStatus.INSTALLABLE && requireUserAction) {
                     installConfirmDialog = true
                 } else {
                     viewModel.installApp(viewModel.uiState.appId)
@@ -107,6 +107,7 @@ fun AppDetailsScreen(
             onOpenClicked = { viewModel.openApp(viewModel.uiState.appId) },
             onOpenAppInfoClicked = { viewModel.openAppInfo(viewModel.uiState.appId) },
             onNavigateToMediaView = onNavigateToMediaView,
+            onNavigateToAppDetails = onNavigateToAppDetails,
             downloadProgress = downloadProgress,
             modifier = modifier,
         )
@@ -115,20 +116,16 @@ fun AppDetailsScreen(
     }
 
     if (installConfirmDialog) {
-        ActionConfirmDialog(
-            title = stringResource(R.string.install_confirm),
+        ActionConfirmDialog(title = stringResource(R.string.install_confirm),
             description = stringResource(R.string.install_confirm_desc),
             onDismiss = { installConfirmDialog = false },
-            onConfirm = { viewModel.installApp(viewModel.uiState.appId) }
-        )
+            onConfirm = { viewModel.installApp(viewModel.uiState.appId) })
     }
     if (uninstallConfirmDialog) {
-        ActionConfirmDialog(
-            title = stringResource(R.string.uninstall_confirm),
+        ActionConfirmDialog(title = stringResource(R.string.uninstall_confirm),
             description = stringResource(R.string.uninstall_confirm_desc),
             onDismiss = { uninstallConfirmDialog = false },
-            onConfirm = { viewModel.uninstallApp(viewModel.uiState.appId) }
-        )
+            onConfirm = { viewModel.uninstallApp(viewModel.uiState.appId) })
     }
 
     if (viewModel.uiState.error != null) {
@@ -148,7 +145,9 @@ fun AppDetails(
     shortDescription: String,
     installStatus: InstallStatus,
     appLinks: ImmutableList<LinkTextData>,
+    appVariants: ImmutableList<App>,
     onNavigateToMediaView: (MediaListInfo) -> Unit,
+    onNavigateToAppDetails: (App) -> Unit,
     onInstallClicked: () -> Unit,
     onUninstallClicked: () -> Unit,
     onOpenClicked: () -> Unit,
@@ -162,14 +161,11 @@ fun AppDetails(
     ) {
         item {
             ConstraintLayout(
-                modifier = Modifier
-                    .padding(horizontal = 10.dp)
+                modifier = Modifier.padding(horizontal = 10.dp)
             ) {
-                val (iconRef, appNameRef, appAuthorRef,
-                    appDownloadProgressRef, installActionsButtonsRef) = createRefs()
-                val (aboutThisAppTextRef, aboutTextRef, appImageList,
-                    whatsNewTextRef, versionTextRef, versionHistoryTextRef) = createRefs()
-                val (whatsNewAppTextRef, appLinksRef) = createRefs()
+                val (iconRef, appNameRef, appAuthorRef, appDownloadProgressRef, installActionsButtonsRef) = createRefs()
+                val (aboutThisAppTextRef, aboutTextRef, appImageList, whatsNewTextRef, versionTextRef, versionHistoryTextRef) = createRefs()
+                val (whatsNewAppTextRef, appLinksRef, appVariantsRef, appVariantsTextRef) = createRefs()
                 val isInstallingAppInProgress = downloadProgress != null
                 var waitingForSize by remember { mutableStateOf(false) }
                 val iconSize by animateDpAsState(
@@ -189,13 +185,10 @@ fun AppDetails(
                         .constrainAs(iconRef) {
                             top.linkTo(parent.top)
                             start.linkTo(parent.start)
-                        },
-                    contentAlignment = Alignment.Center
+                        }, contentAlignment = Alignment.Center
                 ) {
                     AppIcon(
-                        modifier = Modifier
-                            .size(iconSize),
-                        appId = id
+                        modifier = Modifier.size(iconSize), appId = id
                     )
                     if (waitingForSize && !isInstallingAppInProgress) {
                         CircularProgressIndicator(modifier = Modifier.size(96.dp))
@@ -247,12 +240,11 @@ fun AppDetails(
 
 
                 InstallActionsButtons(
-                    modifier = Modifier
-                        .constrainAs(installActionsButtonsRef) {
-                            top.linkTo(iconRef.bottom, margin = 20.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
+                    modifier = Modifier.constrainAs(installActionsButtonsRef) {
+                        top.linkTo(iconRef.bottom, margin = 20.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
                     installStatus = installStatus,
                     enabled = !isInstallingAppInProgress && !waitingForSize,
                     appId = id,
@@ -279,20 +271,15 @@ fun AppDetails(
                     modifier = Modifier.constrainAs(aboutTextRef) {
                         top.linkTo(aboutThisAppTextRef.bottom, margin = 10.dp)
                         start.linkTo(parent.start)
-                    },
-                    text = shortDescription,
-                    fontFamily = InterFontFamily,
-                    fontSize = 16.sp
+                    }, text = shortDescription, fontFamily = InterFontFamily, fontSize = 16.sp
                 )
 
                 AppImages(
-                    modifier = Modifier
-                        .constrainAs(appImageList) {
-                            top.linkTo(aboutTextRef.bottom, margin = 25.dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    appName = name, appId = id, onImageClick = onNavigateToMediaView
+                    modifier = Modifier.constrainAs(appImageList) {
+                        top.linkTo(aboutTextRef.bottom, margin = 25.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }, appName = name, appId = id, onImageClick = onNavigateToMediaView
                 )
 
                 Text(
@@ -330,21 +317,33 @@ fun AppDetails(
 
                 Text(
                     modifier = Modifier.constrainAs(whatsNewAppTextRef) {
-                        top.linkTo(versionTextRef.bottom, margin = 10.dp)
+                        top.linkTo(versionTextRef.bottom, margin = 15.dp)
+                        start.linkTo(parent.start)
+                    }, text = whatsNewText, fontFamily = InterFontFamily, fontSize = 14.sp
+                )
+                Text(
+                    modifier = Modifier.constrainAs(appVariantsTextRef) {
+                        top.linkTo(whatsNewAppTextRef.bottom, margin = 10.dp)
                         start.linkTo(parent.start)
                     },
-                    text = whatsNewText,
+                    text = "App Variants",
                     fontFamily = InterFontFamily,
-                    fontSize = 14.sp
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                )
+                AppVariants(
+                    modifier = Modifier.constrainAs(appVariantsRef) {
+                        top.linkTo(appVariantsTextRef.bottom, margin = 10.dp)
+                        start.linkTo(parent.start)
+                    },
+                    apps = appVariants, onNavigateToAppDetails = onNavigateToAppDetails
                 )
 
                 AppLinks(
-                    modifier = Modifier
-                        .constrainAs(appLinksRef) {
-                            top.linkTo(whatsNewAppTextRef.bottom, margin = 10.dp)
-                            start.linkTo(parent.start)
-                        },
-                    links = appLinks
+                    modifier = Modifier.constrainAs(appLinksRef) {
+                        top.linkTo(appVariantsRef.bottom)
+                        start.linkTo(parent.start)
+                    }, links = appLinks
                 )
             }
 
@@ -377,26 +376,22 @@ fun AppNotFoundError(modifier: Modifier = Modifier) {
 
 @Composable
 private fun AppLinks(
-    links: ImmutableList<LinkTextData>,
-    modifier: Modifier = Modifier
+    links: ImmutableList<LinkTextData>, modifier: Modifier = Modifier
 ) {
-    LazyHorizontalGrid(
+    Column(
         modifier = modifier
-            .height(90.dp), rows = GridCells.Fixed(2)
     ) {
 
+        HorizontalDivider(modifier = Modifier.padding(vertical = 5.dp))
 
-        items(links) { link ->
-            ListItem(
-                leadingContent = {
-                    link.linkType.icon?.let { icon ->
-                        Icon(imageVector = icon, contentDescription = null)
-                    }
-                },
-                headlineContent = {
-                    LinkText(linkTextData = link)
-                })
+        links.forEach { link ->
+            ListItem(leadingContent = {
+                link.linkType.icon?.let { icon ->
+                    Icon(imageVector = icon, contentDescription = null)
+                }
+            }, headlineContent = {
+                LinkText(linkTextData = link)
+            })
         }
     }
-
 }

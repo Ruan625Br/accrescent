@@ -33,6 +33,9 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     val dynamicColor = data.map { preferences ->
         preferences[PreferencesKeys.DYNAMIC_COLOR] ?: false
     }
+    val isCardTransparent = data.map { preferences ->
+        preferences[PreferencesKeys.IS_CARD_TRANSPARENT] ?: false
+    }
     val requireUserAction = data.map { preferences ->
         preferences[PreferencesKeys.REQUIRE_USER_ACTION] ?: !context.isPrivileged()
     }
@@ -46,6 +49,12 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     suspend fun setDynamicColor(dynamicColor: Boolean) {
         context.dataStore.edit {
             it[PreferencesKeys.DYNAMIC_COLOR] = dynamicColor
+        }
+    }
+
+    suspend fun setCardTransparent(isCardTransparent: Boolean){
+        context.dataStore.edit {
+            it[PreferencesKeys.IS_CARD_TRANSPARENT] = isCardTransparent
         }
     }
 
@@ -69,6 +78,7 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
 
     private object PreferencesKeys {
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+        val IS_CARD_TRANSPARENT = booleanPreferencesKey("is_card_transparent")
         val REQUIRE_USER_ACTION = booleanPreferencesKey("require_user_action")
         val AUTOMATIC_UPDATES = booleanPreferencesKey("automatic_updates")
         val UPDATER_NETWORK_TYPE = stringPreferencesKey("updater_network_type")

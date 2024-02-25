@@ -17,6 +17,7 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 fun AppListView(
     apps: List<App>,
+    isCardTransparent: Boolean,
     onClickApp: (App) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -35,9 +36,13 @@ fun AppListView(
     ) {
         RecentlyAddedAppsList(
             apps = apps.take(9).toImmutableList(),
-            onClickApp = onClickApp)
+            onClickApp = onClickApp,
+            isCardTransparent = isCardTransparent)
 
-        CategoriesWithAppsList(appsCategory = appsCategoryMap, onClickApp = {
+        CategoriesWithAppsList(
+            appsCategory = appsCategoryMap,
+            isCardTransparent = isCardTransparent,
+            onClickApp = {
             onClickApp(it.toApp())
         })
     }

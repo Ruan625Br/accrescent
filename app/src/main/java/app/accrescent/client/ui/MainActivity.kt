@@ -90,9 +90,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel: SettingsViewModel = hiltViewModel()
             val dynamicColor by viewModel.dynamicColor.collectAsState(false)
+            val isCardTransparent by viewModel.isCardTransparent.collectAsState(false)
 
             AccrescentTheme(dynamicColor = dynamicColor) {
-                MainContent(appId)
+                MainContent(appId, isCardTransparent)
             }
         }
 
@@ -109,7 +110,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainContent(appId: String?) {
+fun MainContent(appId: String?, isCardTransparent: Boolean) {
     val snackbarHostState = remember { SnackbarHostState() }
     val navController = rememberNavController()
     val screens = listOf(Screen.AppList, Screen.InstalledApps, Screen.AppUpdates)
@@ -151,7 +152,14 @@ fun MainContent(appId: String?) {
             enter = fadeIn(animationSpec = tween(400)),
             exit = fadeOut(animationSpec = tween(400)),
         ) {
-            CenterAlignedTopAppBar(title = {})
+            CenterAlignedTopAppBar(title = {}, navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        stringResource(R.string.back_button)
+                    )
+                }
+            })
         }
         AnimatedVisibility(
             visible = currentDestination?.route == Screen.Settings.route,
@@ -258,9 +266,14 @@ fun MainContent(appId: String?) {
                 }
             }) {
                 AppList(
+                    onNavigateToAppDetails = { app ->
+                        navController.navigate("${Screen.AppDetails.route}/${app.id}")
+
+                    },
                     navController = navController,
                     modifier = Modifier.padding(padding),
                     snackbarHostState = snackbarHostState,
+                    isCardTransparent = isCardTransparent
                 )
             }
             composable(Screen.InstalledApps.route, enterTransition = {
@@ -284,14 +297,19 @@ fun MainContent(appId: String?) {
                     else -> null
                 }
             }) {
-                AppList(
-                    navController = navController,
+                AppList(navController = navController,
+                    onNavigateToAppDetails = { app ->
+                        navController.navigate("${Screen.AppDetails.route}/${app.id}")
+
+                    },
                     modifier = Modifier.padding(padding),
                     snackbarHostState = snackbarHostState,
                     filter = {
                         it == InstallStatus.INSTALLED || it == InstallStatus.UPDATABLE || it == InstallStatus.DISABLED
                     },
                     noFilterResultsText = stringResource(R.string.no_apps_installed),
+                    isFilteredApps = true,
+                    isCardTransparent = isCardTransparent
                 )
             }
             composable(Screen.AppUpdates.route, enterTransition = {
@@ -315,12 +333,17 @@ fun MainContent(appId: String?) {
                     else -> null
                 }
             }) {
-                AppList(
-                    navController = navController,
+                AppList(navController = navController,
+                    onNavigateToAppDetails = { app ->
+                        navController.navigate("${Screen.AppDetails.route}/${app.id}")
+
+                    },
                     modifier = Modifier.padding(padding),
                     snackbarHostState = snackbarHostState,
                     filter = { it == InstallStatus.UPDATABLE },
                     noFilterResultsText = stringResource(R.string.up_to_date),
+                    isFilteredApps = true,
+                    isCardTransparent = isCardTransparent
                 )
             }
             composable("${Screen.AppDetails.route}/{appId}",
@@ -354,6 +377,10 @@ fun MainContent(appId: String?) {
                     onNavigateToMediaView = {
                         val arg = Bundle().apply { putParcelable("mediaListInfo", it) }
                         navController.navigate(Screen.MediaView.route, arg)
+                    },
+                    onNavigateToAppDetails = { app ->
+                        navController.navigate("${Screen.AppDetails.route}/${app.id}")
+
                     })
             }
             composable(Screen.Settings.route, enterTransition = {

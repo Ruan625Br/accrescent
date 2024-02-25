@@ -1,11 +1,14 @@
 package app.accrescent.client.ui.screens.applist
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -27,8 +30,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import app.accrescent.client.R
 import app.accrescent.client.data.InstallStatus
+import app.accrescent.client.data.db.App
+import app.accrescent.client.ui.components.AppCard
 import app.accrescent.client.ui.components.CenteredText
-import app.accrescent.client.ui.screens.Screen
 import app.accrescent.client.ui.views.AppListView
 import kotlinx.coroutines.launch
 
@@ -36,11 +40,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppList(
     navController: NavController,
+    isCardTransparent: Boolean,
+    onNavigateToAppDetails: (App) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
     viewModel: AppListViewModel = hiltViewModel(),
     filter: (installStatus: InstallStatus) -> Boolean = { true },
     noFilterResultsText: String = "",
+    isFilteredApps: Boolean = false
 ) {
     val apps by viewModel.apps.collectAsState(emptyList())
     val scope = rememberCoroutineScope()
@@ -73,8 +80,12 @@ fun AppList(
     }
 
     Box(modifier.pullRefresh(state)) {
-        val verticalArrangement =
-            if (apps.isEmpty() || filteredApps.isEmpty()) Arrangement.Center else Arrangement.Top
+        val verticalArrangement = when {
+            apps.isEmpty() || filteredApps.isEmpty() -> Arrangement.Center
+            isFilteredApps -> Arrangement.spacedBy(5.dp)
+            else -> Arrangement.Top
+        }
+        if (apps.isEmpty() || filteredApps.isEmpty()) Arrangement.Center else Arrangement.Top
 
         LazyColumn(
             Modifier.fillMaxSize(), verticalArrangement = verticalArrangement, state = listState
@@ -89,14 +100,30 @@ fun AppList(
                     item { CenteredText(noFilterResultsText) }
                 }
 
+                isFilteredApps -> {
+                    items(filteredApps) { app ->
+                        AppCard(
+                            modifier = Modifier
+                                .padding(horizontal = 5.dp)
+                                .clickable {
+                                    onNavigateToAppDetails(app)
+                                }, app = app, isCardTransparent = isCardTransparent
+                        )
+
+                    }
+                }
+
                 else -> {
                     item { Spacer(Modifier.height(16.dp)) }
 
                     item {
-                        AppListView(apps = filteredApps, onClickApp = { app ->
-                            navController.navigate("${Screen.AppDetails.route}/${app.id}")
-                        })
+                        AppListView(
+                            apps = filteredApps,
+                            isCardTransparent = isCardTransparent,
+                            onClickApp = onNavigateToAppDetails
+                        )
                     }
+
                 }
             }
         }

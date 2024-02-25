@@ -19,6 +19,7 @@ import app.accrescent.client.data.InstallStatus
 import app.accrescent.client.data.LinkTextData
 import app.accrescent.client.data.PreferencesManager
 import app.accrescent.client.data.RepoDataRepository
+import app.accrescent.client.data.db.App
 import app.accrescent.client.util.PackageManager
 import app.accrescent.client.util.UserRestrictionException
 import app.accrescent.client.util.getPackageInstallStatus
@@ -55,39 +56,50 @@ class AppDetailsViewModel @Inject constructor(
             "Source code",
             "tag_my_source_code",
             "https://github.com/Ruan625Br/FileManagerSphere",
-            CommonsLinkType.SOURCE_CODE),
+            CommonsLinkType.SOURCE_CODE
+        ),
         LinkTextData(
             "License",
             "tag_app_license",
             "https://github.com/Ruan625Br/FileManagerSphere/blob/master/LICENSE",
-            CommonsLinkType.LICENSE),
+            CommonsLinkType.LICENSE
+        ),
         LinkTextData(
             "Donate",
             "tag_app_donate",
             "https://github.com/sponsors/Ruan625Br",
-            CommonsLinkType.DONATE),
+            CommonsLinkType.DONATE
+        ),
         LinkTextData(
             "Translation",
             "tag_app_translation",
             "https://hosted.weblate.org/engage/filemanagersphere/",
-            CommonsLinkType.TRANSLATION),
+            CommonsLinkType.TRANSLATION
+        ),
         LinkTextData(
             "Build metadata",
             "tag_app_build_metadata",
             "https://gitlab.com/fdroid/fdroiddata/-/blob/master/metadata/com.etb.filemanager.yml",
-            CommonsLinkType.BUILD_METADATA),
+            CommonsLinkType.BUILD_METADATA
+        ),
         LinkTextData(
             "Issue tracker",
             "tag_issue_tracker",
             "https://github.com/Ruan625Br/FileManagerSphere/issues",
-            CommonsLinkType.ISSUE_TRACKER),
+            CommonsLinkType.ISSUE_TRACKER
+        ),
         LinkTextData(
             "Generic link example",
             "tag_app_generic_link",
-            "https://github.com/Ruan625Br/FileManagerSphere/pulls"),
+            "https://github.com/Ruan625Br/FileManagerSphere/pulls"
+        ),
     )
 
+    var appsVariants by mutableStateOf<List<App>>(emptyList())
+        private set
+
     init {
+        fetchAppsVariants()
         viewModelScope.launch {
             uiState = uiState.copy(isFetchingData = true, error = null)
 
@@ -102,21 +114,23 @@ class AppDetailsViewModel @Inject constructor(
             uiState = try {
                 val untrustedInfo = repoDataRepository.getAppRepoData(appId)
                 if (appInstallStatuses.statuses[appId] == null) {
-                    appInstallStatuses.statuses[appId] =
-                        try {
-                            context
-                                .packageManager
-                                .getPackageInstallStatus(appId, untrustedInfo.versionCode)
-                        } catch (e: Exception) {
-                            InstallStatus.UNKNOWN
-                        }
+                    appInstallStatuses.statuses[appId] = try {
+                        context.packageManager.getPackageInstallStatus(
+                                appId,
+                                untrustedInfo.versionCode
+                            )
+                    } catch (e: Exception) {
+                        InstallStatus.UNKNOWN
+                    }
                 }
+                //fetchAppsVariants()
                 uiState.copy(
                     versionName = untrustedInfo.version,
                     versionCode = untrustedInfo.versionCode,
                     shortDescription = untrustedInfo.shortDescription
                         ?: context.getString(R.string.no_description_provided),
                 )
+
             } catch (e: ConnectException) {
                 uiState.copy(
                     error = context.getString(R.string.network_error, e.message),
@@ -207,13 +221,24 @@ class AppDetailsViewModel @Inject constructor(
         val context = getApplication<Accrescent>().applicationContext
         val uri = Uri.parse("package:$appId")
 
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            uri
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (intent.resolveActivity(context.packageManager) == null) {
             uiState.error = context.getString(R.string.couldnt_open_appinfo)
             return
         } else {
             context.startActivity(intent)
+        }
+    }
+
+    private fun fetchAppsVariants() = viewModelScope.launch {
+        //TODO(implement real logic)
+        repoDataRepository.getApps().collect { apps ->
+            appsVariants = apps.filter {
+                it.name.startsWith("Arcticons") && it.id != uiState.appId
+            }
         }
     }
 }

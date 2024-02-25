@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,49 +21,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.accrescent.client.data.db.App
 import app.accrescent.client.ui.theme.InterFontFamily
 import app.accrescent.client.ui.theme.Shapes
-import app.accrescent.client.ui.views.AppExampleCategory
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
-fun CategoriesWithAppsList(
-    appsCategory: Map<String, List<AppExampleCategory>>,
-    isCardTransparent: Boolean,
-    onClickApp: (AppExampleCategory) -> Unit,
-    modifier: Modifier = Modifier
+fun AppVariants(
+    apps: ImmutableList<App>, onNavigateToAppDetails: (App) -> Unit, modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.height(600.dp), verticalArrangement = Arrangement.spacedBy(15.dp)
+
+    LazyRow(
+        modifier = modifier.height(120.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        for ((category, apps) in appsCategory) {
-            Text(
-                text = category,
-                fontFamily = InterFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp
+
+        items(apps) { app ->
+            AppItemRow(
+                modifier = Modifier.clickable {
+                    onNavigateToAppDetails(app)
+                }, app = app
             )
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                items(apps, key = { it.id }) { app ->
-                    AppItem(
-                        modifier = Modifier.clickable { onClickApp(app) },
-                        app = app,
-                        isCardTransparent = isCardTransparent
-                    )
-                }
-            }
         }
     }
 }
 
 @Composable
-private fun AppItem(
-    app: AppExampleCategory, isCardTransparent: Boolean, modifier: Modifier = Modifier
+private fun AppItemRow(
+    app: App, modifier: Modifier = Modifier
 ) {
-    CardComponent(
-        isTransparent = isCardTransparent,
+    Card(
         modifier = modifier.size(width = 110.dp, height = 150.dp),
+        shape = Shapes.large,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        )
     ) {
         Column(
             modifier = Modifier
@@ -83,15 +76,6 @@ private fun AppItem(
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
-            )
-            Text(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                text = "Author here",
-                fontFamily = InterFontFamily,
-                fontWeight = FontWeight.Medium,
-                fontSize = 13.sp,
-                textAlign = TextAlign.Center,
-                color = Color(0xFFA8A9AD)
             )
         }
     }

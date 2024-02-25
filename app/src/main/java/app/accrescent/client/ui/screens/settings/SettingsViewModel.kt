@@ -13,12 +13,16 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(private val preferencesManager: PreferencesManager) :
     ViewModel() {
     val dynamicColor = preferencesManager.dynamicColor
+    val isCardTransparent = preferencesManager.isCardTransparent
     val requireUserAction = preferencesManager.requireUserAction
     var automaticUpdates = preferencesManager.automaticUpdates
     val updaterNetworkType = preferencesManager.networkType
 
     suspend fun setDynamicColor(dynamicColor: Boolean) =
         preferencesManager.setDynamicColor(dynamicColor)
+
+    suspend fun setCardTransparent(isCardTransparent: Boolean) =
+        preferencesManager.setCardTransparent(isCardTransparent)
 
     suspend fun setRequireUserAction(requireUserAction: Boolean) =
         preferencesManager.setRequireUserAction(requireUserAction)
