@@ -123,7 +123,6 @@ class AppDetailsViewModel @Inject constructor(
                         InstallStatus.UNKNOWN
                     }
                 }
-                //fetchAppsVariants()
                 uiState.copy(
                     versionName = untrustedInfo.version,
                     versionCode = untrustedInfo.versionCode,

@@ -1,5 +1,6 @@
 package app.accrescent.client.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,13 +15,46 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.accrescent.client.BuildConfig
 import app.accrescent.client.R
 import app.accrescent.client.data.InstallStatus
+import app.accrescent.client.ui.theme.InterFontFamily
 import app.accrescent.client.util.isPrivileged
+import app.accrescent.client.util.isSdkVersionCompatible
 
 @Composable
 fun InstallActionsButtons(
+    minSdkVersion: Int,
+    installStatus: InstallStatus,
+    enabled: Boolean,
+    appId: String,
+    onUninstallClicked: () -> Unit,
+    onInstallClicked: () -> Unit,
+    onOpenAppInfoClicked: () -> Unit,
+    onOpenClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (isSdkVersionCompatible(minSdkVersion)) {
+        ActionsButton(
+            modifier = modifier,
+            installStatus = installStatus,
+            enabled = enabled,
+            appId = appId,
+            onUninstallClicked = onUninstallClicked,
+            onInstallClicked = onInstallClicked,
+            onOpenAppInfoClicked = onOpenAppInfoClicked,
+            onOpenClicked = onOpenClicked
+        )
+    } else {
+        IncompatibleVersionErrorMessage(
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+fun ActionsButton(
     installStatus: InstallStatus,
     enabled: Boolean,
     appId: String,
@@ -36,16 +70,25 @@ fun InstallActionsButtons(
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
-        if (installStatus == InstallStatus.DISABLED && !isPrivilegedApp) {
-            OutlinedButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 6.dp),
-                onClick = { onUninstallClicked() },
-            ) {
-                Text(stringResource(R.string.uninstall))
+        when (installStatus) {
+            InstallStatus.INSTALLED,
+            InstallStatus.UPDATABLE,
+            InstallStatus.DISABLED -> {
+
+                if (!isPrivilegedApp) {
+                    OutlinedButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(horizontal = 6.dp),
+                        onClick = { onUninstallClicked() },
+                    ) {
+                        Text(stringResource(R.string.uninstall))
+                    }
+                }
             }
+
+            else -> Unit
         }
         if (!(installStatus == InstallStatus.INSTALLED && appId == BuildConfig.APPLICATION_ID)) {
             Button(
@@ -93,5 +136,19 @@ fun InstallActionsButtons(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun IncompatibleVersionErrorMessage(
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        Text(
+            text = stringResource(id = R.string.error_incompatible_version_message),
+            fontFamily = InterFontFamily,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.error
+        )
     }
 }

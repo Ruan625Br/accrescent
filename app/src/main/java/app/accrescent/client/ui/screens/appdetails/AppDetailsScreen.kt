@@ -248,6 +248,7 @@ fun AppDetails(
                     installStatus = installStatus,
                     enabled = !isInstallingAppInProgress && !waitingForSize,
                     appId = id,
+                    minSdkVersion = 0,
                     onUninstallClicked = onUninstallClicked,
                     onInstallClicked = {
                         waitingForSize = true

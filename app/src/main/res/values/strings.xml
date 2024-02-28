@@ -78,4 +78,5 @@
     <string name="media_view">Media View</string>
     <string name="card_backgrounds_transparent">Card backgrounds transparent</string>
     <string name="card_backgrounds_transparent_desc">Make card backgrounds transparent</string>
+    <string name="error_incompatible_version_message">We regret to inform you that this application is not compatible with your device\'s operating system version. Please check the minimum system requirements and ensure that your device meets these specifications for a successful installation.</string>
 </resources>
