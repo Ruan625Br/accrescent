@@ -46,8 +46,8 @@ android {
         applicationId = "app.accrescent.client"
         minSdk = 29
         targetSdk = 34
-        versionCode = 41
-        versionName = "0.17.1"
+        versionCode = 42
+        versionName = "0.18.0"
         resourceConfigurations.addAll(listOf(
             "ar",
             "az",
@@ -113,7 +113,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.9"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
 
     dependenciesInfo {
