@@ -12,7 +12,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,7 +19,6 @@ import app.accrescent.client.BuildConfig
 import app.accrescent.client.R
 import app.accrescent.client.data.InstallStatus
 import app.accrescent.client.ui.theme.InterFontFamily
-import app.accrescent.client.util.isPrivileged
 import app.accrescent.client.util.isSdkVersionCompatible
 
 @Composable
@@ -64,28 +62,19 @@ fun ActionsButton(
     onOpenClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val isPrivilegedApp = context.isPrivileged() && appId == BuildConfig.APPLICATION_ID
 
     Row(
         modifier = modifier.fillMaxWidth()
     ) {
         when (installStatus) {
-            InstallStatus.INSTALLED,
-            InstallStatus.UPDATABLE,
-            InstallStatus.DISABLED -> {
-
-                if (!isPrivilegedApp) {
-                    OutlinedButton(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(horizontal = 6.dp),
-                        onClick = { onUninstallClicked() },
-                    ) {
-                        Text(stringResource(R.string.uninstall))
-                    }
-                }
+            InstallStatus.INSTALLED, InstallStatus.UPDATABLE, InstallStatus.DISABLED -> OutlinedButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 6.dp),
+                onClick = { onUninstallClicked() },
+            ) {
+                Text(stringResource(R.string.uninstall))
             }
 
             else -> Unit
@@ -99,40 +88,32 @@ fun ActionsButton(
                 enabled = enabled,
                 onClick = {
                     when (installStatus) {
-                        InstallStatus.INSTALLABLE,
-                        InstallStatus.UPDATABLE -> {
+                        InstallStatus.INSTALLABLE, InstallStatus.UPDATABLE -> {
                             onInstallClicked()
                         }
 
                         InstallStatus.DISABLED -> onOpenAppInfoClicked()
                         InstallStatus.INSTALLED -> onOpenClicked()
-                        InstallStatus.LOADING,
-                        InstallStatus.UNKNOWN -> Unit
+                        InstallStatus.LOADING, InstallStatus.UNKNOWN -> Unit
                     }
                 },
             ) {
                 when (installStatus) {
-                    InstallStatus.INSTALLABLE ->
-                        Text(stringResource(R.string.install))
+                    InstallStatus.INSTALLABLE -> Text(stringResource(R.string.install))
 
-                    InstallStatus.UPDATABLE ->
-                        Text(stringResource(R.string.update))
+                    InstallStatus.UPDATABLE -> Text(stringResource(R.string.update))
 
-                    InstallStatus.DISABLED ->
-                        Text(stringResource(R.string.enable))
+                    InstallStatus.DISABLED -> Text(stringResource(R.string.enable))
 
-                    InstallStatus.INSTALLED ->
-                        Text(stringResource(R.string.open))
+                    InstallStatus.INSTALLED -> Text(stringResource(R.string.open))
 
-                    InstallStatus.LOADING ->
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 3.dp
-                        )
+                    InstallStatus.LOADING -> CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 3.dp
+                    )
 
-                    InstallStatus.UNKNOWN ->
-                        Text(stringResource(R.string.unknown))
+                    InstallStatus.UNKNOWN -> Text(stringResource(R.string.unknown))
                 }
             }
         }

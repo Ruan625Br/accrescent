@@ -17,7 +17,6 @@ import app.accrescent.client.data.AppInstallStatuses
 import app.accrescent.client.data.CommonsLinkType
 import app.accrescent.client.data.InstallStatus
 import app.accrescent.client.data.LinkTextData
-import app.accrescent.client.data.PreferencesManager
 import app.accrescent.client.data.RepoDataRepository
 import app.accrescent.client.data.db.App
 import app.accrescent.client.util.PackageManager
@@ -40,13 +39,11 @@ class AppDetailsViewModel @Inject constructor(
     private val repoDataRepository: RepoDataRepository,
     appInstallStatuses: AppInstallStatuses,
     private val packageManager: PackageManager,
-    preferencesManager: PreferencesManager,
     savedStateHandle: SavedStateHandle
 ) : AndroidViewModel(context as Application) {
     private val appId = savedStateHandle.get<String>("appId")!!
     val installStatuses = appInstallStatuses.statuses
     var downloadProgresses = appInstallStatuses.downloadProgresses
-    val requireUserAction = preferencesManager.requireUserAction
     var uiState by mutableStateOf(AppDetailsUiState(appId = appId))
         private set
 

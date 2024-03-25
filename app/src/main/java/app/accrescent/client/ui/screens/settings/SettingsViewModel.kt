@@ -14,7 +14,6 @@ class SettingsViewModel @Inject constructor(private val preferencesManager: Pref
     ViewModel() {
     val dynamicColor = preferencesManager.dynamicColor
     val isCardTransparent = preferencesManager.isCardTransparent
-    val requireUserAction = preferencesManager.requireUserAction
     var automaticUpdates = preferencesManager.automaticUpdates
     val updaterNetworkType = preferencesManager.networkType
 
@@ -23,9 +22,6 @@ class SettingsViewModel @Inject constructor(private val preferencesManager: Pref
 
     suspend fun setCardTransparent(isCardTransparent: Boolean) =
         preferencesManager.setCardTransparent(isCardTransparent)
-
-    suspend fun setRequireUserAction(requireUserAction: Boolean) =
-        preferencesManager.setRequireUserAction(requireUserAction)
 
     suspend fun setUpdaterNetworkType(context: Context, networkType: NetworkType) {
         preferencesManager.setNetworkType(networkType.name)

@@ -9,7 +9,6 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.work.NetworkType
-import app.accrescent.client.util.isPrivileged
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -36,9 +35,6 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     val isCardTransparent = data.map { preferences ->
         preferences[PreferencesKeys.IS_CARD_TRANSPARENT] ?: false
     }
-    val requireUserAction = data.map { preferences ->
-        preferences[PreferencesKeys.REQUIRE_USER_ACTION] ?: !context.isPrivileged()
-    }
     val automaticUpdates = data.map { preferences ->
         preferences[PreferencesKeys.AUTOMATIC_UPDATES] ?: true
     }
@@ -64,11 +60,6 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
         }
     }
 
-    suspend fun setRequireUserAction(requireUserAction: Boolean) {
-        context.dataStore.edit {
-            it[PreferencesKeys.REQUIRE_USER_ACTION] = requireUserAction
-        }
-    }
 
     suspend fun setNetworkType(networkType: String) {
         context.dataStore.edit {
@@ -79,7 +70,6 @@ class PreferencesManager @Inject constructor(@ApplicationContext private val con
     private object PreferencesKeys {
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val IS_CARD_TRANSPARENT = booleanPreferencesKey("is_card_transparent")
-        val REQUIRE_USER_ACTION = booleanPreferencesKey("require_user_action")
         val AUTOMATIC_UPDATES = booleanPreferencesKey("automatic_updates")
         val UPDATER_NETWORK_TYPE = stringPreferencesKey("updater_network_type")
     }
