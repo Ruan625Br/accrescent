@@ -11,13 +11,20 @@ import app.accrescent.client.Accrescent
 import app.accrescent.client.R
 import app.accrescent.client.data.AppInstallStatuses
 import app.accrescent.client.data.RepoDataRepository
+import app.accrescent.client.data.db.App
+import app.accrescent.client.data.models.Ads
+import app.accrescent.client.data.models.AdsAction
+import app.accrescent.client.data.models.AdsType
+import app.accrescent.client.data.models.AppCategory
 import app.accrescent.client.util.getPackageInstallStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.SerializationException
+import okhttp3.internal.immutableListOf
 import java.io.FileNotFoundException
 import java.net.ConnectException
 import java.net.UnknownHostException
@@ -44,6 +51,7 @@ class AppListViewModel @Inject constructor(
                 } catch (e: Exception) {
                     null
                 }
+                setupAds(app)
                 appInstallStatuses.statuses[app.id] =
                     context.packageManager.getPackageInstallStatus(app.id, latestVersionCode)
             }
@@ -57,6 +65,37 @@ class AppListViewModel @Inject constructor(
     var isRefreshing by mutableStateOf(false)
         private set
     var error: String? by mutableStateOf(null)
+
+    //TODO(Implement real logic)
+    var adsList by  mutableStateOf(listOf(Ads(
+        title = "Top apps for education",
+        subtitle = "Our educational titles",
+        imageUrl = "https://i.ibb.co/Sf8w4r3/img0.webp",
+        type = AdsType.OFFICIAL,
+        clickAction = AdsAction.ShowAppsFromAdCategory(AppCategory.EDUCATIONAL)
+    ), Ads(
+        title = "Arcticons: Your Customizable Icon Pack for Android",
+        subtitle = "Enhance your apps with sleek and customizable vector icons.",
+        imageUrl = "https://raw.githubusercontent.com/Arcticons-Team/Arcticons/main/github/header-background.png",
+        type = AdsType.SPONSORED,
+        clickAction = AdsAction.ShowAppDetails,
+        appId = "com.donnnno.arcticons"
+    ), Ads(
+        title = "Watch YouTube Ad-Free with Clipious",
+        subtitle = "An alternative Android client with no ads and more features.",
+        imageUrl = "https://raw.githubusercontent.com/lamarios/clipious/master/screenshots/tablet-home_small.png",
+        type = AdsType.SPONSORED,
+        clickAction = AdsAction.ShowAppDetails,
+        appId = "com.github.lamarios.clipious"
+    ), Ads(
+        title = "FileManagerSphere is coming to Accrescent!!",
+        subtitle = "FileManagerSphere, a customizable and modern file manager",
+        imageUrl = "https://i.ibb.co/Tt6n2hW/Page-1.png",
+        type = AdsType.SPONSORED,
+        clickAction = AdsAction.OpenLink("https://github.com/Ruan625Br/FileManagerSphere"),
+    )))
+
+
 
     fun refreshRepoData() {
         viewModelScope.launch {
@@ -87,5 +126,15 @@ class AppListViewModel @Inject constructor(
         viewModelScope.launch {
             apps.collect()
         }
+    }
+
+    private fun setupAds(app: App){
+       val matchingAd = adsList.find { it.appId == app.id }
+       matchingAd?.let {
+           adsList = adsList.toMutableList().apply {
+               val index = indexOf(it)
+               set(index, matchingAd.copy(app = app))
+           }
+       }
     }
 }

@@ -34,6 +34,7 @@ import app.accrescent.client.data.db.App
 import app.accrescent.client.ui.components.AppCard
 import app.accrescent.client.ui.components.CenteredText
 import app.accrescent.client.ui.views.AppListView
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -54,6 +55,7 @@ fun AppList(
     val installStatuses = viewModel.installStatuses
     val filteredApps = apps.filter { filter(installStatuses[it.id] ?: InstallStatus.LOADING) }
         .sortedBy { it.name.lowercase() }
+    val adsList = viewModel.adsList
 
     val refreshScope = rememberCoroutineScope()
     val state = rememberPullRefreshState(viewModel.isRefreshing, onRefresh = {
@@ -118,6 +120,7 @@ fun AppList(
 
                     item {
                         AppListView(
+                            adsList = adsList,
                             apps = filteredApps,
                             isCardTransparent = isCardTransparent,
                             onClickApp = onNavigateToAppDetails

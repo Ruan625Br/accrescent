@@ -10,12 +10,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.accrescent.client.data.db.App
+import app.accrescent.client.data.models.Ads
 import app.accrescent.client.ui.components.CategoriesWithAppsList
+import app.accrescent.client.ui.components.ListAds
 import app.accrescent.client.ui.components.RecentlyAddedAppsList
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun AppListView(
+    adsList: List<Ads>,
     apps: List<App>,
     isCardTransparent: Boolean,
     onClickApp: (App) -> Unit,
@@ -34,6 +38,8 @@ fun AppListView(
             .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(25.dp)
     ) {
+        ListAds(list = adsList, onNavigateToAppDetails = onClickApp)
+        
         RecentlyAddedAppsList(
             apps = apps.take(9).toImmutableList(),
             onClickApp = onClickApp,

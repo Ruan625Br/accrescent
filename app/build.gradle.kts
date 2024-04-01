@@ -178,6 +178,7 @@ dependencies {
     implementation(libs.google.fonts)
     implementation(libs.constraintlayout.compose)
     implementation(libs.zoomable)
+    implementation(libs.palette)
     ksp(libs.dagger.compiler)
     ksp(libs.hilt.compiler)
     ksp(libs.room.compiler)
